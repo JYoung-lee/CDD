@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.3.xsd
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd"
+>
+
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/html;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	<!-- HelloController hello = new HelloController() 와 동일 -->
+	<!-- <bean id="hello" class="test.spring.bean.HelloController" /> -->
+	<!-- Date 객체가 필요 : jsp:useBean과 비슷하게 객체 생성
+		 차이점은 useBean : 기본생성자만 호출하여 객체 생성
+		 		  bean	  : 매개변수가 있는 생성자 호출 가능.
+	-->
+	<bean id="day" class="java.util.Date" />
+	
+	<!-- 작성한 패키지안의 클래스중 @Controller 가 붙은 클래스들을 모두 스캔하여 객체생성 -->
+	<context:component-scan base-package="cdd" />
+	
+	<!-- 0222 -->
+	<!-- 다운로드 비즈니스 로직 처리해주는 클래스 Bean 객체 만들기 -->
+	<!-- <bean id="fileDown" class="test.spring.model.DownloadView" /> -->
+	
+	<bean class = "org.springframework.web.servlet.view.BeanNameViewResolver">
+		<property name="order" value="0" />
+	</bean>
+	
+	<!--  ViewResolver 세팅
+		  prefix : 접두어 -> /WEB-INF/...
+		  suffix : 접미어 -> .jsp
+	 -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="1" />
+	</bean>
+	
+	<!-- 파일 업로드 세팅 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="-1" />
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+	
+	<!-- 0223 -->
+	<!-- DB커넥션 정보 세팅 
+		dataSource, sqlSessionFactory, sqlSession -->
+		
+	<!-- DB dataSource -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" 
+		destroy-method="close"
+		p:driverClassName="oracle.jdbc.driver.OracleDriver"
+		p:url="jdbc:oracle:thin:@nullmasternull.iptime.org:3000:ORCL"
+		p:username="team03"
+		p:password="team03"	/>
+	<!-- <bean id="dataSourceSpied" class="org.apache.commons.dbcp.BasicDataSource" 
+		destroy-method="close"
+		p:driverClassName="oracle.jdbc.driver.OracleDriver"
+		p:url="jdbc:oracle:thin:@nullmaster.iptime.org:3000:ORCL"
+		p:username="java02"
+		p:password="java02"	/>
+		
+	<bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		<constructor-arg ref="dataSourceSpied" />
+		<property name="logFormatter">
+			<bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<property name="loggingType" value="MULTI_LINE" />
+				<property name="sqlPrefix" value="SQL : "/>
+			</bean>
+		</property>
+	</bean> -->
+	
+	<!-- 커넥션풀 역할 -->
+	<!-- sqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" >
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="/WEB-INF/mybatis/mybatis-config.xml" />
+	</bean>
+	<!-- 커넥션 역할 -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+</beans>
+	
+
+

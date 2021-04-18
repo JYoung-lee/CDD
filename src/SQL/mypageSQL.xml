@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="myPage">
+	
+	<!--  ============================================================= 추가 ============================================ -->
+	<!-- userProfile noteCount -->
+	<select id="userProfileNoteCount" parameterType="string" resultType="int">
+		select count(*) from notes where user_id=#{value}
+	</select>
+	
+	<!-- userProfile noteList 가져오기 -->
+	<select id="userProfileNoteList" parameterType="string" resultType="notesDTO">
+		select * from notes where user_id=#{value}
+	</select>
+	
+	<!-- userProfile scheduleCount -->
+	<select id="userProfileSchedulesCount" parameterType="string" resultType="int">
+		select count(*) from schedules where user_id=#{value}
+	</select>
+	
+	<!-- userProfile scheduleList 가져오기 -->
+	<select id="userProfileSchedulesList" parameterType="string" resultType="schedulesDTO">
+		select * from schedules where user_id=#{value}
+	</select>
+	
+	
+	
+	
+	
+	<!--  ============================================================= 일지 관련 ============================================ -->
+	
+	<!-- 일지 등록  [ 준용 ] -->
+	<insert id="insertNote" parameterType="notesDTO" >
+		insert into notes values(note_num_seq.nextval, #{user_id}, #{pet_num}, #{note_emotion}, #{note_weight},#{note_dry}, #{note_wet}, #{note_water}, #{note_disorder1}, #{note_disorder2}, #{note_disorder3}, #{note_stroll1}, #{note_stroll2}, #{note_stroll3}, #{note_bath}, #{note_secret}, #{note_date}, #{note_other})
+	</insert>
+
+	<!-- 펫 해당날짜 일지 카운트 -->
+	<select id="getPetNoteCount" parameterType="hashmap" resultType="int">
+		select count(*) from notes where pet_num=#{pet_num} and note_date=#{clickDay}
+	</select>
+	
+	<!-- 펫 해당 날짜 일지 가져오기-->
+	<select id="getPetNote" parameterType="hashmap" resultType="notesDTO">
+		select * from notes where pet_num=#{pet_num} and note_date=#{clickDay}
+	</select>
+
+	<!-- 유저 일지 카운트  -->
+	<select id="getNoteListCnt" parameterType="string" resultType="int">
+		select count(*) from notes where user_id=#{value}	
+	</select>
+	
+	<!-- 유저 일지 List 가져오기  -->
+	<select id="getNoteList" parameterType="string" resultType="notesListDTO">
+		select n.note_num, n.pet_num, p.pet_name, n.note_bath, n.note_secret, n.note_date from notes n, pet_info p where p.pet_number = n.pet_num and p.user_id=#{value} order by n.note_date
+	</select>	
+	
+	<!-- 해당 일지 가져오기(1개) -->
+	<select id="getPetOneNote" parameterType="int" resultType="notesDTO">
+		select * from notes where note_num = #{value}
+	</select>
+	
+	<!-- 일지 수정 -->
+	<update id="noteModify" parameterType="notesDTO">
+		update notes set 
+		note_weight=#{note_weight}, note_dry=#{note_dry}, note_wet=#{note_wet}, note_water=#{note_water}, 
+		note_disorder1=#{note_disorder1}, note_disorder2=#{note_disorder2}, note_disorder3=#{note_disorder3}, 
+		note_stroll1=#{note_stroll1}, note_stroll2=#{note_stroll2}, note_stroll3=#{note_stroll3},
+		note_other=#{note_other}, note_bath=#{note_bath}, note_secret=#{note_secret} 
+		where note_num = #{note_num}	
+	</update>
+	
+	<!-- 일지 삭제  -->
+	<delete id="deleteNote" parameterType="int">
+		delete from notes where note_num = #{value}
+	</delete>
+
+
+
+
+
+
+	<!--  ============================================================= 일정 관련 ============================================ -->
+	
+	<!-- 일정 등록 [ 준용 ] -->
+	<insert id="insertSchedule" parameterType="schedulesDTO"> 
+		insert into schedules values(sche_num_seq.nextval, #{user_id}, #{pet_num}, #{sche_date}, #{sche_subject}, #{sche_content}, #{sche_time})
+	</insert>	
+	
+	<!-- 펫 일정 카운트 [ 준용 ] -->
+	<select id="petScheduleCount" parameterType="int" resultType="int">
+		select count(*) from schedules where pet_num=#{value}
+	</select>
+	
+	<!-- 일정 가져오기 List [ 준용 ] -->
+	<select id="getScheduleList" parameterType="hashmap" resultType="schedulesDTO">
+		select * from schedules where pet_num=#{pet_num} and sche_date=#{clickDay}
+	</select>
+
+	<!-- 유저 펫 일정 리스트 카운트 [ 준용 ] -->
+	<select id="scheduleListCnt" parameterType="string" resultType="int">
+		select count(*) from schedules where user_id=#{value}
+	</select>
+	
+	<!-- 유저 펫 일정 리스트 가져오기 [ 준용 ] -->
+	<select id="scheduleList" parameterType="string" resultType="scheduleListDTO">
+		select s.sche_num, s.pet_num,p.pet_name, s.sche_subject, s.sche_content, s.sche_date, s.sche_time from schedules s, pet_info p where p.pet_number= s.pet_num AND p.user_id=#{value} order by s.sche_date, s.sche_time
+	</select>	
+
+	 <!-- 펫 일정 수정 정보 가져오기 [ 준용 ] -->
+	<select id="petOneSchedule" parameterType="int" resultType="schedulesDTO">
+		select * from schedules where sche_num=#{value}
+	</select>
+	
+	<!-- 펫 일정 수정 [ 준용 ] -->
+	<update id="scheduleModify" parameterType="schedulesDTO">
+		update schedules set sche_date=#{sche_date}, sche_subject=#{sche_subject}, sche_content=#{sche_content}, sche_time=#{sche_time} where sche_num=#{sche_num}
+	</update>
+	
+	
+	<!-- 펫 일정 삭제  [ 준용 ] -->
+	<delete id="deleteSchedule" parameterType="int">
+		delete from schedules where sche_num=#{value}
+	</delete>
+</mapper>
+

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="user">
+  	
+  	<!-- 로그인 아이디, pw체크 (승목)-->
+  	<select id="idPwCheck" parameterType="userDTO" resultType="int">
+  		select count(*) from cddUser where user_id=#{user_id} and user_pw=#{user_pw}
+  	</select>
+  	
+  	<!-- 회원 차단 체크 -->
+  	<select id="blockCh" parameterType="string" resultType="int">
+  		select blocked from cddUser where user_id=#{value}
+  	</select>
+  	
+  	<!-- 회원 가입(승목) -->
+  	<insert id="insertUser" parameterType="userDTO">
+  		INSERT into cddUser(USER_ID, USER_PW, USER_NAME, USER_TEL, USER_EMAIL, USER_PROFILE,BLOCKED, USER_REG)
+  		values(#{user_id}, #{user_pw}, #{user_name}, #{user_tel}, #{user_email}, #{user_profile}, 0, sysdate)
+  	</insert>
+  	
+  	<!-- 사용가능 id, email 확인(승목) -->
+  	<select id="idEmailAvail" parameterType="hashmap" resultType="int">
+  		select count(*) from cddUser where user_id=#{id} or user_email=#{email}
+  	</select>
+  	
+  	<!-- email로 id 찾기(승목) -->
+  	<select id="findId" parameterType="string" resultType="string">
+		select user_id from cdduser where user_email=#{value} 	
+  	</select>
+  
+  	<!-- id, email로 pw 찾기(승목) -->
+  	<select id="findPw" parameterType="hashmap" resultType="int">
+  		select count(*) from cdduser where user_Id=#{id} and user_email=#{email}
+  	</select>
+  	
+  	<!-- id로 pw 수정(승목) -->
+  	<update id="pwEdit" parameterType="userDTO">
+  		update cdduser set user_pw=#{user_pw} where user_id=#{user_id}
+  	</update>
+  
+  	<!-- id로 회원 한명 정보 가져오기(승목) -->
+  	<select id="getMember" parameterType="string" resultType="userDTO">
+  		select * from cddUser where user_id=#{value}
+  	</select>
+  	
+  	<!-- id로 회원 정보 수정(승목) -->
+  	<update id="updateMember" parameterType="userDTO">
+  		update cddUser
+  		<trim prefix="set" suffixOverrides=",">
+  			<if test="user_name != null">user_name=#{user_name},</if>
+  			<if test="user_tel != null">user_tel=#{user_tel},</if>
+  			<if test="user_email != null">user_email=#{user_email},</if>
+  			<if test="user_profile != null">user_profile=#{user_profile},</if>
+  			<if test="user_bio != null">user_bio=#{user_bio}</if>
+  		</trim>
+  		where user_id=#{user_id}
+  	</update>
+  	
+  	<!-- 아이디 패스워드로 회원 확인 [선준] -->
+  	<select id="pwCheck" parameterType="map" resultType="int">
+  		select count(*) from cddUser where user_id=#{userId} and user_pw=#{exPw}
+  	</select>
+  	
+  	<!-- 아이디 새 패스워드로 비번 변경 [선준] -->
+  	<update id="pwUpdate" parameterType="map">
+  		update cddUser set user_pw=#{newPw} where user_id=#{userId}
+  	</update>
+  	
+  	<!-- 사용자 검색결과 [선준] -->
+  	<select id="searchUsers" parameterType="string" resultType="userDTO">
+		SELECT * from cddUser where (user_id like '%'||#{value}||'%' or user_name like '%'||#{value}||'%') and blocked != 1
+	</select>
+  </mapper>

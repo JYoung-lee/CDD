@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="reports">
+	<!-- 회원 목록 가져오기 -->
+  	<select id="memberList" resultType="userDTO">
+  		SELECT * FROM CDDUSER order by user_reg desc
+  	</select>
+  	
+  	<!-- 회원 blocked 업데이트 -->
+  	<update id="updateBlocked" parameterType="map">
+  		UPDATE cdduser SET BLOCKED =#{blocked} WHERE user_id=#{id}
+  	</update>
+  	
+  	<!-- 회원 1명 신고리스트 가져오기 -->
+  	<select id="memberReportList" parameterType="string" resultType="reportsDTO">
+  		SELECT * FROM REPORTS WHERE REPOTEDID=#{id } ORDER BY REPORT_NUM DESC
+  	</select>
+  	
+  	<!-- 회원 1명 신고 갯수 가져오기 -->
+  	<select id="getReportsCount" parameterType="string" resultType="int">
+  		select count(*) from reports where repotedId=#{id}
+  	</select>
+  	
+	<select id="getReportAllList" parameterType="map" resultType="reportsDTO">
+		<![CDATA[
+			SELECT B.* FROM 
+			(SELECT A.*, rownum r FROM 
+			(SELECT * FROM reports ORDER BY report_num DESC) A 
+			ORDER BY report_num DESC) B where r>=#{startNum} and r<=#{endNum}
+		]]>
+	</select>
+	<select id="getReportCateList" parameterType="map" resultType="reportsDTO">
+		<![CDATA[
+			SELECT B.* FROM 
+			(SELECT A.*, rownum r FROM 
+			(SELECT * FROM reports where report_cate=#{report_cate} ORDER BY report_num DESC) A 
+			ORDER BY report_num DESC) B where r>=#{startNum} and r<=#{endNum}
+		]]>
+	</select>
+	
+	<select id="getReportTypeList" parameterType="map" resultType="reportsDTO">
+		<![CDATA[
+			SELECT B.* FROM 
+			(SELECT A.*, rownum r FROM 
+			(SELECT * FROM reports where report_type=#{report_cate} ORDER BY report_num DESC) A 
+			ORDER BY report_num DESC) B where r>=#{startNum} and r<=#{endNum}
+		]]>
+	</select>
+		
+	<update id="updateStatus" parameterType="map">
+		<if test="status == 0">
+			update reports set reportState=1 where report_num=#{reportNum}
+		</if>
+		<if test="status == 1">
+			update reports set reportState=0 where report_num=#{reportNum}
+		</if>
+	</update>
+	<select id="getStatus" parameterType="int" resultType="int">
+		select reportState from reports where report_num=#{value}
+	</select>
+	<delete id="deleteReport" parameterType="int">
+		DELETE reports WHERE report_num=#{report_num}
+	</delete>
+	
+	
+</mapper>

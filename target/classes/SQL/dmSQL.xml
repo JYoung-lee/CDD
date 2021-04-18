@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="dm">
+	<!-- 특정 유저와의 dm 대화 가져오기 [선준] -->
+	<select id="getDmList" parameterType="map" resultType="dmDTO">
+		select * from dm where userId=#{memId} and (sender=#{chatId} or receiver=#{chatId}) order by dm_reg
+	</select>
+	
+	<!-- dm 보내기 [선준] -->
+	<insert id="insertDm1" parameterType="map">
+		insert into dm values(dm_num_seq.nextval, #{memId}, #{memId}, #{chatId}, #{sendContent}, 0, sysdate)
+	</insert>
+	<insert id="insertDm2" parameterType="map">
+		insert into dm values(dm_num_seq.nextval, #{chatId}, #{memId}, #{chatId}, #{sendContent}, 0, sysdate)
+	</insert>
+	
+	<!-- dm 삭제하기 [선준] -->
+	<delete id="deleteDm" parameterType="map">
+		delete from dm where userId=#{memId} and ((sender=#{memId} and receiver=#{chatId}) or (sender=#{chatId} and receiver=#{memId}))
+	</delete>
+	
+	<!-- 미확인 dm 개수 가져오기 [선준] -->
+	<select id="getUnChDmCnt" parameterType="string" resultType="int">
+		select count(*) from dm where userId=#{value} and sender not in #{value} and status=0
+	</select>
+	
+	<!-- dm 확인상태 변경 [선준] -->
+	<update id="updateStatus" parameterType="map">
+		update dm set status=1 where userId=#{memId} and sender=#{chatId}
+	</update>
+	
+	<!-- 특정 사용자별 미확인 dm 개수 가져오기 [선준] -->
+	<select id="getChatStatus" parameterType="map" resultType="int">
+		select count(*) from dm where userId=#{userId} and sender=#{chatId} and status=0
+	</select>
+</mapper>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="pet">
+	<select id="getPetTypes" resultType="pet_typeDTO">
+		select * from pet_type
+	</select>
+	<insert id="insertPetType" parameterType="string">
+		insert into pet_type values(type_num_seq.nextval, #{value})
+	</insert>
+	<delete id="deletePetType" parameterType="int">
+		delete from pet_type where type_num=#{value}
+	</delete>
+	<select id="getKindList" parameterType="int" resultType="pet_kindDTO">
+		select * from pet_kind where type_num=#{value}
+	</select>
+	<insert id="insertPetKind" parameterType="map">
+		insert into pet_kind values(kind_num_seq.nextval, #{kindName}, #{typeNum})
+	</insert>
+	<delete id="deletePetKind" parameterType="int">
+		delete from pet_kind where kind_num = #{value}
+	</delete>
+	
+	<!-- ================================   펫 관련 SQL     ============================== -->
+	<!-- 펫 Info 등록 -->
+	<insert id="insertPetInfo" parameterType="pet_infoDTO">
+		insert into pet_info values(pet_number_seq.nextval, #{user_id}, #{type_num}, #{kind_num}, #{kind_other}, #{pet_profile}, #{pet_name}, #{pet_gender}, #{pet_birth}, #{pet_tt}, #{pet_ttday}, #{pet_meet})
+	</insert>
+	<!-- 펫 sick 질환 등록-->
+	<insert id="insertPetSick" parameterType="pet_sickDTO">
+		insert into pet_sick values(#{pet_number}, #{user_id}, #{sick_status}, #{pet_sickname}, #{pet_sickday}, #{pet_hospital}, sysdate)
+	</insert>
+	<!-- 펫 JJ 접종 등록-->
+	<insert id="insertPetJJ" parameterType="pet_jjDTO">
+		insert into pet_jj values(#{pet_number}, #{user_id}, #{pet_jjname}, #{pet_jjday}, #{pet_jjhospital}, sysdate)
+	</insert>
+	<!-- 펫 surg 수술 등록-->
+	<insert id="insertPetSurg" parameterType="pet_surgDTO">
+		insert into pet_surg values(#{pet_number}, #{user_id}, #{pet_surgname}, #{pet_surgday}, #{pet_surghospi}, sysdate)
+	</insert>
+	
+	<!-- 펫 정보 카운드 가져오기 -->
+	<select id="getPetInfoCount" parameterType="string" resultType="int">
+		select count(*) from pet_info where user_id=#{value}
+	</select>
+	<!-- 펫 정보 List로 가져오기 -->	
+	<select id="getPetInfoList" parameterType="string" resultType="pet_infoDTO">
+		select * from pet_info where user_id=#{value}
+	</select>
+	
+	<!-- 해당 유저와 펫 질환 등록 카운트 -->
+	<select id="getSickCount" parameterType="hashmap" resultType="int">
+		select count(*) from pet_sick where user_id=#{user_id} and pet_number=#{pet_number}	
+	</select>
+	<!-- 해당 유저와 펫 접종 등록 카운트 -->
+	<select id="getJJCount" parameterType="hashmap" resultType="int">
+		select count(*) from pet_jj where user_id=#{user_id} and pet_number=#{pet_number}	
+	</select>
+	<!-- 해당 유저와 펫 수술 등록 카운트 -->
+	<select id="getSurgCount" parameterType="hashmap" resultType="int">
+		select count(*) from pet_surg where user_id=#{user_id} and pet_number=#{pet_number}	
+	</select>
+	
+	<!-- 해당 유저와 펫 정보 한개 레코드 가져오기-->
+	<select id="getPetOneInfo" parameterType="hashmap" resultType="pet_infoDTO">
+		select * from pet_info where user_id=#{user_id} and pet_number=#{pet_number}
+	</select>
+	<!-- 해당 유저와 펫 질환 List  가져오기-->
+	<select id="getPetSickList" parameterType="hashmap" resultType="pet_sickDTO">
+		select * from pet_sick where user_id=#{user_id} and pet_number=#{pet_number}
+	</select>
+	<!-- 해당 유저와 펫 접종 List 가져오기-->
+	<select id="getPetjjList" parameterType="hashmap" resultType="pet_jjDTO">
+		select * from pet_jj where user_id=#{user_id} and pet_number=#{pet_number}
+	</select>
+	<!-- 해당 유저와 펫 수술 List 가져오기-->
+	<select id="getPetSurgList" parameterType="hashmap" resultType="pet_surgDTO">
+		select * from pet_surg where user_id=#{user_id} and pet_number=#{pet_number}
+	</select>
+	
+	
+	<!-- 펫 Number(고유번호) 가져오기 -->
+	<select id="getPetNumber" parameterType="hashmap" resultType="pet_infoDTO">
+		select * from pet_info where user_id=#{user_id} and pet_name=#{pet_name}
+	</select>
+	<!-- 펫 종류 List 가져오기 -->
+	<select id="getType" resultType="pet_typeDTO">
+		select * from pet_type
+	</select>		
+	<!-- 펫 품종 List 가져오기 -->
+	<select id="getKind" parameterType="int" resultType="pet_kindDTO">
+		select * from pet_kind where type_num = #{value}
+	</select>
+
+
+	<!-- 해당 유저의 펫 종류 가져오기 -->
+	<select id="getOnePetType" parameterType="int" resultType="string">
+		select type_name from pet_type where type_num=#{value}
+	</select>
+	<!-- 해당 유저의 펫 품종 가져오기 -->
+	<select id="getOnePetKind" parameterType="int" resultType="string">
+		select kind_name from pet_kind where kind_num=#{value}
+	</select>
+
+	<!-- petInfo 수정하기 ajax  -->
+	<update id="petModifyInfo" parameterType="pet_infoDTO">
+		update pet_info set pet_birth=#{pet_birth}, pet_tt=#{pet_tt}, pet_ttday=#{pet_ttday}, pet_meet=#{pet_meet} where user_id = #{user_id} and pet_number = #{pet_number} 
+	</update>
+
+	<!-- 펫 이미지 변경 -->
+	<update id="petUploadImg" parameterType="pet_infoDTO">
+		update pet_info set pet_profile=#{pet_profile} where user_id = #{user_id} and pet_number = #{pet_number}
+	</update>
+
+	<!-- 펫 해당 이미지 가져오기 ajax  -->
+	<select id="getPetImg" parameterType="pet_infoDTO" resultType="string">
+		select pet_profile from pet_info where user_id = #{user_id} and pet_number = #{pet_number}
+	</select>
+</mapper>

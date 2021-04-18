@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!-- mybatis 관련 설정 파일 -->
+<configuration>
+	<!-- jdbcTypeForNull... 에러발생 -->
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+	<!-- 별칭 Alias -->
+	<typeAliases>
+		<typeAlias type="cdd.model.dto.UserDTO" alias="userDTO"/>
+		<typeAlias type="cdd.model.dto.DmDTO" alias="dmDTO"/>
+		<typeAlias type="cdd.model.dto.AlarmsDTO" alias="alarmsDTO"/>
+		<typeAlias type="cdd.model.dto.FeedsDTO" alias="feedsDTO"/>
+		<typeAlias type="cdd.model.dto.FeedsAndPhotoDTO" alias="fapDTO"/>
+		<typeAlias type="cdd.model.dto.CollectionDTO" alias="collectionDTO"/>
+		<typeAlias type="cdd.model.dto.ReportsDTO" alias="reportsDTO"/>
+		<typeAlias alias="notesDTO" type="cdd.model.dto.NotesDTO"/>
+		<typeAlias alias="pet_typeDTO" type="cdd.model.dto.Pet_TypeDTO"/>
+		<typeAlias alias="pet_kindDTO" type="cdd.model.dto.Pet_KindDTO"/>
+		<typeAlias alias="pet_infoDTO" type="cdd.model.dto.Pet_InfoDTO"/>
+		<typeAlias alias="pet_jjDTO" type="cdd.model.dto.Pet_JJDTO"/>
+		<typeAlias alias="pet_sickDTO" type="cdd.model.dto.Pet_SickDTO"/>
+		<typeAlias alias="pet_surgDTO" type="cdd.model.dto.Pet_SurgDTO"/>
+		<typeAlias type="cdd.model.dto.Feed_PhotosDTO" alias="feed_PhotosDTO" />
+		<typeAlias type="cdd.model.dto.Feed_RepliesDTO" alias="feed_Replies" />
+		<typeAlias type="cdd.model.dto.Get_RepliesDTO" alias="get_Replies" />
+		<typeAlias alias="schedulesDTO" type="cdd.model.dto.SchedulesDTO"/>
+		<typeAlias alias="scheduleListDTO" type="cdd.model.dto.ScheduleListDTO"/>
+		<typeAlias alias="notesListDTO" type="cdd.model.dto.NotesListDTO"/>
+		<typeAlias alias="followsDTO" type="cdd.model.dto.FollowsDTO"/>
+	</typeAliases>
+
+
+	
+	<!-- mapper 파일 위치 세팅 -->
+	<mappers>
+		<mapper resource="/SQL/cddSQL.xml" />
+		<mapper resource="/SQL/followSQL.xml" />
+		<mapper resource="/SQL/dmSQL.xml" />
+		<mapper resource="/SQL/dmUserRecSQL.xml" />
+		<mapper resource="/SQL/alarmsSQL.xml" />
+		<mapper resource="/SQL/feedSQL.xml" />
+		<mapper resource="/SQL/collectionSQL.xml" />
+		<mapper resource="/SQL/reportsSQL.xml" />
+		<mapper resource="/SQL/petSQL.xml" />
+		<mapper resource="/SQL/mypageSQL.xml" />
+	</mappers>
+</configuration>

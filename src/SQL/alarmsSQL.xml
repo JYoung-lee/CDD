@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="alarms">
+	<insert id="insertAlarms" parameterType="java.util.Map">
+		<selectKey resultType="string"
+			keyProperty="alarm_fromProfile" order="BEFORE">
+			SELECT user_profile FROM
+			CDDUSER WHERE user_id=#{alarm_fromId}
+		</selectKey>
+		insert into alarms values(#{feed_num}, #{user_to},
+		#{alarm_content}, 0,
+		#{alarm_fromId}, sysdate)
+	</insert>
+
+	<delete id="deleteAlarms" parameterType="java.util.Map">
+		<if test="feed_num != 0">
+			DELETE alarms WHERE feed_num=#{feed_num} AND
+			alarmfromid=#{alarm_fromId}
+		</if>
+		<if test="feed_num == 0">
+			DELETE alarms WHERE feed_num=#{feed_num} AND
+			alarmfromid=#{alarm_fromId} and user_id=#{user_to}
+		</if>
+	</delete>
+	
+	<!-- 해당 유저 알람 리스트 가져오기 -->
+	<select id="getAlarms" parameterType="string" resultType="alarmsDTO">
+		SELECT al.*, cdd.USER_PROFILE FROM alarms al, CDDUSER cdd 
+		WHERE al.ALARMFROMID = cdd.user_id AND al.user_id=#{sessId}
+	</select>
+	
+	<!-- 미확인 alarm 개수 -->
+	<select id="getUnChAlrmCnt" parameterType="string" resultType="int">
+		select count(*) from alarms where user_id = #{value} and alarm_status=0
+	</select>
+	
+	<!-- 알람 status 변경 -->
+	<update id="updateAlarmStatus" parameterType="string">
+		update alarms set alarm_status=1 where user_id=#{value}
+	</update>
+</mapper>

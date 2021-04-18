@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="feeds">
+	<insert id="insertFeed" parameterType="feedsDTO">
+		insert into feeds
+		values(#{feed_num}, #{user_id}, #{feed_content},
+		#{feed_emotion},
+		#{feed_secret}, sysdate, #{feed_hash}, #{feed_reportCh})
+	</insert>
+
+	<insert id="insertPhotos" parameterType="java.util.List">
+
+		<foreach collection="list" item="item" separator=" "
+			open="insert all" close="SELECT * FROM DUAL">
+			into feed_photos(feed_num, photo_dir,
+			photo_order)
+			values( #{item.feed_num}, #{item.photo_dir},
+			#{item.photo_order})
+		</foreach>
+	</insert>
+
+	<select id="nextNum" resultType="int">
+		select feed_num_seq.nextval from
+		dual
+	</select>
+
+	<select id="getFeed" parameterType="int" resultType="feedsDTO">
+		SELECT
+		feed.*, cdd.USER_PROFILE FROM feeds feed, CDDUSER cdd
+		WHERE feed.USER_ID = cdd.user_id AND feed.feed_num=#{feed_num}
+	</select>
+
+	<select id="getPhotos" parameterType="int"
+		resultType="feed_PhotosDTO">
+		select photo_dir,photo_order from feed_photos where
+		feed_num=#{feed_num}
+	</select>
+
+	<insert id="insertReply" parameterType="java.util.Map">
+		<selectKey resultType="int" keyProperty="reply_num"
+			order="BEFORE">
+			SELECT reply_num_seq.nextval FROM dual
+		</selectKey>
+		<if test="reply_level == 0">
+			insert into feed_Replies
+			(reply_num, feed_num, user_id,
+			reply_content, reply_ref, reply_reg)
+			values(#{reply_num}, #{feed_num},
+			#{user_id}, #{reply_content},
+			#{reply_num}, sysdate)
+		</if>
+		<if test="reply_level == 1">
+			insert into feed_Replies
+			(reply_num, feed_num, user_id,
+			reply_content, reply_ref,reply_level,reply_id,
+			reply_reg)
+			values(#{reply_num}, #{feed_num}, #{user_id},
+			#{reply_content},
+			#{reply_ref},#{reply_level},#{reply_id}, sysdate)
+		</if>
+
+
+
+
+	</insert>
+
+	<select id="getReplies" parameterType="int"
+		resultType="get_Replies">
+		SELECT cdduser.USER_PROFILE, fr.*
+		FROM CDDUSER, FEED_REPLIES
+		fr
+		WHERE fr.USER_ID = cdduser.user_id AND fr.FEED_NUM=#{feed_num} ORDER
+		BY
+		fr.REPLY_REF, fr.REPLY_REG
+	</select>
+
+	<select id="likeCh" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM FEED_LIKES WHERE feed_num=#{feed_num}
+		AND user_id=#{user_id}
+	</select>
+
+	<insert id="insertLike" parameterType="java.util.Map">
+		insert into feed_likes
+		values(#{feed_num}, #{user_id})
+
+	</insert>
+
+	<delete id="deleteLike" parameterType="java.util.Map">
+		DELETE feed_likes WHERE
+		feed_num=#{feed_num} and USER_id=#{user_id}
+	</delete>
+
+	<insert id="insertAlarms" parameterType="java.util.Map">
+		<selectKey resultType="string" keyProperty="user_id"
+			order="BEFORE">
+			SELECT user_id FROM feeds WHERE feed_num=#{feed_num}
+		</selectKey>
+		insert into alarms values(#{feed_num}, #{user_id},
+		#{alarm_content}, 0,
+		#{alarmFromId}, #{alarm_fromProfile}, sysdate)
+	</insert>
+
+	<delete id="deleteAlarms" parameterType="java.util.Map">
+		DELETE alarms WHERE
+		feed_num=#{feed_num} AND alarmfromid=#{alarmFromId}
+	</delete>
+
+	<select id="countLikes" parameterType="int" resultType="int">
+		SELECT
+		count(*) FROM FEED_LIKES WHERE FEED_NUM=#{feed_num}
+	</select>
+
+	<insert id="insertFollow" parameterType="java.util.Map">
+		insert into follows
+		values(#{user_from}, #{user_to})
+	</insert>
+
+	<select id="followCh" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM FOLLOWS WHERE USER_FROM=#{user_from}
+		AND USER_TO=#{user_to}
+	</select>
+
+	<delete id="deleteFollow" parameterType="java.util.Map">
+		DELETE follows WHERE
+		user_from=#{user_from} AND user_to=#{user_to}
+	</delete>
+
+	<select id="bookCh" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM COLLECTION WHERE user_id=#{user_id}
+		AND FEED_NUM=#{feed_num}
+	</select>
+
+	<insert id="insertBookmark">
+		INSERT INTO COLLECTION values(#{user_id},
+		#{feed_num})
+	</insert>
+
+	<delete id="deleteBookmark">
+		DELETE COLLECTION WHERE user_id=#{user_id} AND
+		feed_num=#{feed_num}
+	</delete>
+
+	<!-- 해시태그 검색 카운트 -->
+	<select id="searchTagCount" parameterType="string"
+		resultType="int">
+		SELECT count(*) FROM feeds f, feed_photos fp WHERE
+		(f.feed_num = fp.feed_num AND fp.photo_order=0 AND f.FEED_SECRET=0)
+		and feed_hash like '%'||#{value}||'%' ORDER BY f.feed_num desc
+	</select>
+
+	<!-- 해시태그 검색 결과 리스트 + 피드 대표사진 : 조인 [선준] -->
+	<select id="getSearchTags" parameterType="string"
+		resultType="fapDTO">
+		SELECT f.*, fp.photo_dir FROM feeds f, feed_photos fp WHERE
+		(f.feed_num = fp.feed_num AND fp.photo_order=0 AND f.FEED_SECRET=0)
+		and feed_hash like '%'||#{value}||'%' ORDER BY f.feed_num desc
+	</select>
+
+	<!-- 피드내용 검색 결과 리스트 + 피드 대표사진 : 조인 [선준] -->
+
+
+
+	<select id="getSearchFeeds" parameterType="string"
+		resultType="fapDTO">
+		SELECT f.*, fp.photo_dir FROM feeds f, feed_photos fp WHERE
+		(f.feed_num = fp.feed_num AND fp.photo_order=0)
+		and feed_content like
+		'%'||#{value}||'%' ORDER BY f.feed_num desc
+	</select>
+
+	<!-- feed_num 으로 피드 리스트 검색 -->
+	<select id="getFeedList" parameterType="int" resultType="fapDTO">
+		SELECT
+		f.*, fp.photo_dir FROM feeds f, feed_photos fp WHERE (f.feed_num =
+		fp.feed_num AND fp.photo_order=0)
+		and f.feed_num=#{value} order by
+		f.feed_num desc
+	</select>
+
+	<!-- 사용자 id 로 피드 개수 검색 -->
+	<select id="getFeedCnt" parameterType="string" resultType="int">
+		select count(*) from feeds where user_id = #{value}
+	</select>
+
+	<!-- 3.31 훈영 추가 -->
+
+	<select id="followsMainFeed" parameterType="java.util.Map"
+		resultType="feedsDTO">
+
+		select * from
+		(SELECT a.*, rownum r FROM
+		(SELECT feed.*,cdd.USER_PROFILE
+		FROM feeds feed, FOLLOWS f, cdduser cdd
+		WHERE user_from=#{user_id} AND
+		f.USER_TO = feed.USER_ID AND cdd.user_id =
+		feed.USER_ID
+		ORDER BY
+		feed.feed_reg DESC) a) where 
+		<![CDATA[
+		r >= #{startRow} and r <= #{endRow}
+		]]>
+	</select>
+
+	<!-- 4.03 훈영 추가 -->
+	<select id="countFollowsFeed" parameterType="String"
+		resultType="int">
+		SELECT count(*) FROM
+		(SELECT feed.*,cdd.USER_PROFILE FROM
+		feeds feed, FOLLOWS f, cdduser cdd
+		WHERE user_from=#{user_id} AND
+		f.USER_TO = feed.USER_ID AND cdd.user_id =
+		feed.USER_ID
+		ORDER BY
+		feed.feed_reg DESC) a
+	</select>
+
+	<!-- 4.9 훈영 추가 -->
+	<select id="getMainAllFeed" parameterType="java.util.Map"
+		resultType="fapDTO">
+		<![CDATA[
+		SELECT * FROM
+		(SELECT b.*, rownum r from
+		(SELECT f.*, fp.PHOTO_DIR FROM feeds f, feed_photos fp
+		WHERE (f.feed_num = fp.feed_num AND fp.photo_order=0 AND f.FEED_SECRET=0)
+		ORDER BY f.feed_num DESC) b) WHERE r >=#{startRow} AND r<=#{endRow}
+		]]>
+	</select>
+
+	<!-- 4.9 훈영 추가 -->
+
+	<select id="getMainAllCount" resultType="int">
+		SELECT count(*) FROM
+		(SELECT f.*, fp.PHOTO_DIR FROM feeds f, feed_photos fp
+		WHERE
+		(f.feed_num = fp.feed_num AND fp.photo_order=0 AND f.FEED_SECRET=0)
+		ORDER BY f.feed_num DESC)
+	</select>
+
+	<!-- 4. 13 훈영 추가 -->
+
+	<select id="getMyAllFeed" resultType="fapDTO"
+		parameterType="java.util.Map">
+		<![CDATA[
+		SELECT * FROM
+		(SELECT b.*, rownum r from
+		(SELECT f.*, fp.PHOTO_DIR FROM feeds f, feed_photos fp
+		WHERE (f.feed_num = fp.feed_num AND fp.photo_order=0 AND user_id=#{user_id})
+		ORDER BY f.feed_num DESC) b) WHERE r >=#{startRow} AND r<=#{endRow}
+		]]>
+	</select>
+	
+	<select id="getMyFeedCount" resultType="int" parameterType="java.util.Map">
+		<if test="myCh == 0">
+			SELECT count(*) FROM feeds WHERE user_id=#{user_id}
+		</if>
+		<if test="myCh == 1">
+			SELECT count(*) FROM feeds WHERE user_id=#{user_id} and FEED_SECRET=0
+		</if>
+	</select>
+
+</mapper>
+		
+		
+		
+		
